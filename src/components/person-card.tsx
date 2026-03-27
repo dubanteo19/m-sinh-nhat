@@ -20,15 +20,32 @@ export const PersonCard = ({ id, dob, name }: Person) => {
     day: "numeric",
   });
 
+  const thao = id == 6;
   const color = colorMap[id] || "bg-gray-400";
 
   return (
     <div
       style={{
         animationDelay: `${id * 0.2}s`,
+        background: thao
+        ? `
+        radial-gradient(#f9a8d4 2px, transparent 2px),
+        radial-gradient(#f9a8d4 2px, transparent 2px),
+        #ffffff`
+        : undefined,
+        backgroundSize: thao ? "16px 16px" : undefined,
+        backgroundPosition: thao ? "0 0, 8px 8px" : undefined,
       }}
-      className="w-[180px] bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 p-5 flex flex-col items-center text-center  animate-[float_3s_ease-in-out_infinite]"
+      className="w-[180px] bg-white  relative rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 p-5 flex flex-col items-center text-center  animate-[float_3s_ease-in-out_infinite]"
     >
+      {thao && (
+        <img
+          width={30}
+          className="absolute top-[5px] right-[2px] rotate-25"
+          height={30}
+          src="bowtie.png"
+        />
+      )}
       {/* Avatar */}
       <div
         className={`w-16 ${color}  h-16 rounded-full flex items-center justify-center text-white text-xl font-bold mb-3`}

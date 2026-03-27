@@ -8,7 +8,7 @@ export const HomePage = () => {
     const next = new Date(
       today.getFullYear(),
       birthDate.getMonth(),
-      birthDate.getDay(),
+      birthDate.getDate(),
     );
     if (next < today) {
       next.setFullYear(today.getFullYear() + 1);
