@@ -20,7 +20,8 @@ export const PersonCard = ({ id, dob, name }: Person) => {
     day: "numeric",
   });
 
-  const thao = id == 6;
+  const ids = [6,3,4,5]
+  const thao = ids.includes(id);
   const color = colorMap[id] || "bg-gray-400";
 
   return (
