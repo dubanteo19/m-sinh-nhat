@@ -14,13 +14,28 @@ export const PersonCard = ({ id, dob, name }: Person) => {
     const [year, month, day] = dob.split("-");
     return new Date(Number(year), Number(month) - 1, Number(day));
   };
+
   const date = parseDOB(dob);
   const formattedDob = date.toLocaleDateString("vi-VN", {
     month: "long",
     day: "numeric",
   });
 
-  const ids = [6,3,4,5]
+  const today = new Date();
+
+  // Birthday this year
+  const nextBirthday = new Date(
+    today.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+  );
+  if (nextBirthday < today) {
+    nextBirthday.setFullYear(today.getFullYear() + 1);
+  }
+
+  const diffTime = nextBirthday.getTime() - today.getTime();
+  const remaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const ids = [6, 3, 4, 5];
   const thao = ids.includes(id);
   const color = colorMap[id] || "bg-gray-400";
 
@@ -29,11 +44,11 @@ export const PersonCard = ({ id, dob, name }: Person) => {
       style={{
         animationDelay: `${id * 0.2}s`,
         background: thao
-        ? `
+          ? `
         radial-gradient(#f9a8d4 2px, transparent 2px),
         radial-gradient(#f9a8d4 2px, transparent 2px),
         #ffffff`
-        : undefined,
+          : undefined,
         backgroundSize: thao ? "16px 16px" : undefined,
         backgroundPosition: thao ? "0 0, 8px 8px" : undefined,
       }}
@@ -57,6 +72,8 @@ export const PersonCard = ({ id, dob, name }: Person) => {
       <h2 className="text-lg font-semibold text-gray-800">{name}</h2>
       {/* Birthday */}
       <p className="text-gray-500 text-sm mt-1">🎂 {formattedDob}</p>
+      {/* Remainng */}
+      <p className="text-gray-500 text-sm mt-1">{remaining} ngày nựa</p>
     </div>
   );
 };

@@ -4,13 +4,15 @@ import { people } from "@/data/people";
 export const HomePage = () => {
   const getNextBirthDay = (dob: string) => {
     const today = new Date();
-    const birthDate = new Date(dob);
+    const [year, month, day] = dob.split("-");
+    const birthDate = new Date(Number(year), Number(month) - 1, Number(day));
+
     const next = new Date(
       today.getFullYear(),
       birthDate.getMonth(),
       birthDate.getDate(),
     );
-    if (next < today) {
+    if (next <= today) {
       next.setFullYear(today.getFullYear() + 1);
     }
     return next;
