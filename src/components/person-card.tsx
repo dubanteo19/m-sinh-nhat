@@ -73,7 +73,7 @@ export const PersonCard = ({ id, dob, name }: Person) => {
       {/* Birthday */}
       <p className="text-gray-500 text-sm mt-1">🎂 {formattedDob}</p>
       {/* Remainng */}
-      <p className="text-gray-500 text-sm mt-1">{remaining} ngày nựa</p>
+      <p className="text-red-600 font-bold text-sm mt-1">{remaining} ngày nựa</p>
     </div>
   );
 };
