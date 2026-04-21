@@ -10,6 +10,7 @@ import { MasonryPhotoAlbum, type Photo } from "react-photo-album";
 import { useParams } from "react-router-dom";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import "react-photo-album/masonry.css";
 export const InfoPage = () => {
   const { id } = useParams();
   const person = people.find((p) => p.id === id);
@@ -83,9 +84,7 @@ export const InfoPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-blue-100 py-10 px-4 max-w-screen-2xl mx-auto">
       <div className="flex justify-center items-center flex-col gap-6">
         <PersonCard {...toPersonView(person)} />
-
         <div className="flex items-center gap-4">
-          <span>Năm</span>
           <select
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
@@ -98,34 +97,37 @@ export const InfoPage = () => {
             ))}
           </select>
 
-          <UploadButton
-            personId={id!}
-            year={year}
-            onSuccess={fetchPhotos} // 3. Refetch instead of reload!
-          />
-        </div>
-        {photos.length > 0 && (
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => {
-                setIsEditMode(!isEditMode);
-                setSelectedIds([]); // Clear selection when toggling
-              }}
-              className={`p-2 rounded-xl transition ${isEditMode ? "bg-red-500 text-white" : "bg-white text-gray-600 shadow-sm"}`}
-            >
-              {isEditMode ? "Hủy nha" : "Sửa ⚙️"}
-            </button>
+          {!isEditMode && (
+            <UploadButton
+              personId={id!}
+              year={year}
+              onSuccess={fetchPhotos} // 3. Refetch instead of reload!
+            />
+          )}
 
-            {isEditMode && selectedIds.length > 0 && (
+          {photos.length > 0 && (
+            <div className="flex items-center gap-4">
               <button
-                onClick={handleDelete}
-                className="bg-red-600 text-white px-4 py-2 rounded-full font-bold animate-pulse shadow-sm hover:bg-red-700 transition-colors"
+                onClick={() => {
+                  setIsEditMode(!isEditMode);
+                  setSelectedIds([]);
+                }}
+                className={`py-2  px-4 rounded-xl transition ${isEditMode ? "bg-red-400 text-white" : "bg-white text-gray-600 shadow-sm"}`}
               >
-                Xóa ({selectedIds.length})
+                {isEditMode ? "Hủy" : "Sửa ⚙️"}
               </button>
-            )}
-          </div>
-        )}
+
+              {isEditMode && selectedIds.length > 0 && (
+                <button
+                  onClick={handleDelete}
+                  className="bg-red-400 text-white py-2 px-6 rounded-2xl font-bold animate-pulse shadow-sm hover:bg-red-700 transition-colors"
+                >
+                  Xóa ({selectedIds.length})
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="mt-8">
@@ -143,35 +145,35 @@ export const InfoPage = () => {
                 }
               }}
               render={{
-                photo: ({ onClick }, { photo, width, height }) => {
+                // 1. Custom Image - The library handles the container/spacing!
+                image: (props, { photo, width, height }) => {
                   const isSelected = selectedIds.includes(photo.key as string);
                   return (
-                    <div
-                      key={photo.key}
-                      style={{ width: `${width}px`, height: `${height}px` }}
-                      onClick={(event) => onClick?.(event)}
-                      className="relative group cursor-pointer"
-                    >
-                      <SmartImage
-                        width={width}
-                        src={photo.src}
-                        alt={photo.alt as string}
-                        height={height}
-                        containerStyle={{ width: "100%", height: "100%" }}
-                        className={`transition-all duration-300 ${
-                          isSelected ? "scale-90 opacity-60 brightness-75" : ""
-                        }`}
-                      />
+                    <SmartImage
+                      {...props} // Spreads src, alt, style (with width/height) from the lib
+                      width={width}
+                      alt="hinh anh"
+                      height={height}
+                      containerStyle={{ width: "100%", height: "100%" }}
+                      className={`transition-all duration-300 rounded-xl ${
+                        isSelected ? "scale-90 opacity-60 brightness-75" : ""
+                      } ${props.className}`}
+                    />
+                  );
+                },
+                // 2. Custom Overlays - These sit on top of the image
+                extras: (_, { photo }) => {
+                  const isSelected = selectedIds.includes(photo.key as string);
+                  if (!isEditMode) return null;
 
-                      {isEditMode && isSelected && (
-                        <div className="absolute top-[8px] right-[8px] flex items-center justify-center pointer-events-none z-10">
-                          <span className="text-white text-3xl">✅</span>
+                  return (
+                    <div className="absolute inset-0 pointer-events-none z-10">
+                      {isSelected ? (
+                        <div className="absolute top-2 right-2 text-3xl">
+                          ✅
                         </div>
-                      )}
-
-                      {/* Subtle border - matches the container exactly */}
-                      {isEditMode && !isSelected && (
-                        <div className="absolute inset-0 border-2 border-dashed border-red-400 rounded-xl pointer-events-none" />
+                      ) : (
+                        <div className="absolute inset-0 border-2 border-dashed border-red-400 rounded-xl" />
                       )}
                     </div>
                   );
@@ -194,4 +196,3 @@ export const InfoPage = () => {
     </div>
   );
 };
-

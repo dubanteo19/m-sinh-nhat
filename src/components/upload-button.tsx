@@ -61,16 +61,15 @@ export const UploadButton = ({ personId, year, onSuccess }: Props) => {
       setIsLoading(false);
     }
   };
-
   return (
     <label
       className={`
-      cursor-pointer bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 
+      cursor-pointer bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 
       rounded-full font-medium transition shadow-lg flex items-center gap-2 w-fit
       ${isLoading ? "opacity-50 pointer-events-none" : "active:scale-95"}
     `}
     >
-      {isLoading ? "Đang nén & upload... ⏳" : "Upload hình 📸"}
+      {isLoading ? "Đang nén & upload... ⏳" : "Upload 📸"}
       <input
         type="file"
         accept="image/*"
