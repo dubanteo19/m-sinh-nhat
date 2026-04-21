@@ -32,7 +32,7 @@ jobs:
       - name: Build the app
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_CLOUDINARY_NAME: ${{ secrets.VITE_CLOUDINARY_NAME }}
           VITE_CLOUDINARY_PRESET: ${{ secrets.VITE_CLOUDINARY_PRESET }}
         run: npm run build
