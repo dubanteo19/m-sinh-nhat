@@ -1,5 +1,10 @@
 export type Person = {
-  id: number;
+  id: string;
   name: string;
   dob: string;
+};
+
+export type PersonView = Person & {
+  remaining: number;
+  displayDob: string;
 };

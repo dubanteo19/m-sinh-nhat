@@ -1,31 +1,18 @@
 import { PersonCard } from "@/components/person-card";
 import { people } from "@/data/people";
+import { getNextBirthDay, toPersonView } from "@/lib/utils";
 
 export const HomePage = () => {
-  const getNextBirthDay = (dob: string) => {
-    const today = new Date();
-    const [year, month, day] = dob.split("-");
-    const birthDate = new Date(Number(year), Number(month) - 1, Number(day));
-
-    const next = new Date(
-      today.getFullYear(),
-      birthDate.getMonth(),
-      birthDate.getDate(),
-    );
-    if (next <= today) {
-      next.setFullYear(today.getFullYear() + 1);
-    }
-    return next;
-  };
   const sortedPeope = [...people].sort((a, b) => {
     const dateA = getNextBirthDay(a.dob);
     const dateB = getNextBirthDay(b.dob);
     return dateA.getTime() - dateB.getTime();
   });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-blue-100 py-10 px-4">
       <div className="flex gap-2 flex-wrap">
-        {sortedPeope.map((person) => (
+        {sortedPeope.map(toPersonView).map((person) => (
           <PersonCard {...person} key={person.id} />
         ))}
       </div>
