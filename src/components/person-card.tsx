@@ -32,7 +32,7 @@ export const PersonCard = ({ id, displayDob, name, remaining }: PersonView) => {
           width={30}
           className="absolute top-[5px] right-[2px] rotate-25"
           height={30}
-          src="bowtie.png"
+          src="/bowtie.png"
         />
       )}
       {/* Avatar */}
