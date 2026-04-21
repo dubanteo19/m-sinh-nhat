@@ -19,11 +19,13 @@ export const PersonCard = ({ id, displayDob, name, remaining }: PersonView) => {
   return (
     <div
       style={{
-        animationDelay: `${ids.indexOf(id) * 0.2}s`
+        animationDelay: `${ids.indexOf(id) * 0.2}s`,
       }}
       onClick={() => navigate(`/info/${id}`)}
-      className={cn("w-[180px] bg-white cursor-pointer relative rounded-2xl shadow-md hover:shadow-lg transition-shadow",
-        "duration-300 p-5 flex flex-col items-center text-center  animate-[float_3s_ease-in-out_infinite]")}
+      className={cn(
+        "w-[180px] bg-white cursor-pointer relative rounded-2xl shadow-md hover:shadow-lg transition-shadow",
+        "duration-300 p-5 flex flex-col items-center text-center  animate-[float_3s_ease-in-out_infinite]",
+      )}
     >
       {thao && (
         <img
@@ -44,7 +46,9 @@ export const PersonCard = ({ id, displayDob, name, remaining }: PersonView) => {
       {/* Birthday */}
       <p className="text-gray-500 text-sm mt-1">🎂 {displayDob}</p>
       {/* Remainng */}
-      <p className="text-red-600 font-bold text-sm mt-1">{remaining} ngày nựa</p>
+      <p className="text-red-600 font-bold text-sm mt-1">
+        {remaining} ngày nựa
+      </p>
     </div>
   );
 };
