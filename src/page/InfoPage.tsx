@@ -1,3 +1,4 @@
+import { FullLoading } from "@/components/full-loading";
 import { PersonCard } from "@/components/person-card";
 import SmartImage from "@/components/smart-image";
 import { UploadButton } from "@/components/upload-button";
@@ -77,7 +78,7 @@ export const InfoPage = () => {
     );
   };
   if (!person) return <div className="p-10 text-center">Person not found</div>;
-  if (loading) return;
+  if (loading) return <FullLoading />;
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 to-blue-100 py-10 px-4 max-w-screen-2xl mx-auto">
       <div className="flex justify-center items-center flex-col gap-6">
