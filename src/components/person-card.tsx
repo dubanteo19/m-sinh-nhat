@@ -10,6 +10,7 @@ const colorMap: Record<string, string> = {
   thiet: "bg-yellow-400",
   hary: "bg-red-400",
   hieu: "bg-indigo-400",
+  nhom: "bg-orange-400",
 };
 export const PersonCard = ({ id, displayDob, name, remaining }: PersonView) => {
   const ids = ["thuy", "thu", "thiet", "hary"];

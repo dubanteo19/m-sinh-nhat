@@ -8,4 +8,5 @@ export const people: Person[] = [
   { id: "thiet", name: "Thị Thiết", dob: "2003-05-24" },
   { id: "hary", name: "Hary Lê", dob: "2003-04-11" },
   { id: "hieu", name: "Minh Hiếu", dob: "2003-09-28" },
+  { id: "nhom", name: "Đặc biệt", dob: "2026-12-30" },
 ];
