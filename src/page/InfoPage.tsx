@@ -88,7 +88,6 @@ export const InfoPage = () => {
           {!isEditMode && (
             <UploadButton personId={id!} onSuccess={fetchPhotos} />
           )}
-
           {allPhotos.length > 0 && (
             <div className="flex items-center gap-4">
               <button
@@ -117,7 +116,9 @@ export const InfoPage = () => {
 
       <div className="mt-8">
         {Object.keys(groupedPhotos).length > 0 ? (
-          Object.entries(groupedPhotos).map(([year, yearPhotos]) => (
+          Object.entries(groupedPhotos)
+          .sort(([yearA], [yearB]) => parseInt(yearB) - parseInt(yearA))
+          .map(([year, yearPhotos]) => (
             <div key={year} className="space-y-4">
               {/* Year Header */}
               <div className="flex items-center gap-4">

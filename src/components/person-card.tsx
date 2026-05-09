@@ -31,7 +31,7 @@ export const PersonCard = ({ id, displayDob, name, remaining }: PersonView) => {
       {thao && (
         <img
           width={30}
-          className="absolute top-[5px] right-[2px] rotate-25"
+          className="absolute top-[5px] right-[2px] rotate-25 [animation:rotate-bowtie_2s_ease-in-out_infinite]"
           height={30}
           src="/bowtie.png"
         />
