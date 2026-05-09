@@ -4,52 +4,52 @@ import SmartImage from "@/components/smart-image";
 import { UploadButton } from "@/components/upload-button";
 import { people } from "@/data/people";
 import { supabase } from "@/lib/supabase";
-import { toPersonView } from "@/lib/utils";
-import { useCallback, useEffect, useState } from "react";
-import { MasonryPhotoAlbum, type Photo } from "react-photo-album";
+import { cn, toPersonView } from "@/lib/utils";
+import { getPersonPhotosGrouped, type GroupedPhotos } from "@/services/photo";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { MasonryPhotoAlbum } from "react-photo-album";
+import "react-photo-album/masonry.css";
 import { useParams } from "react-router-dom";
 import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
+import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
+
+// 2. Import Plugin CSS
+import "yet-another-react-lightbox/plugins/thumbnails.css";
 import "yet-another-react-lightbox/styles.css";
-import "react-photo-album/masonry.css";
 export const InfoPage = () => {
   const { id } = useParams();
   const person = people.find((p) => p.id === id);
   const [index, setIndex] = useState<number>(-1);
-  const [year, setYear] = useState<number>(new Date().getFullYear());
-  const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  // 1. Define the fetch logic separately so we can call it anytime
+  const [groupedPhotos, setGroupedPhotos] = useState<GroupedPhotos>({});
+
   const fetchPhotos = useCallback(async () => {
     if (!id) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from("photos")
-      .select("*")
-      .eq("person_id", id)
-      .eq("year", year)
-      .order("created_at", { ascending: false });
-
-    if (!error && data) {
-      setPhotos(
-        data.map((p) => ({
-          src: p.url,
-          width: p.width,
-          height: p.height,
-          alt: p.alt_text,
-          key: p.id,
-        })),
-      );
+    try {
+      const grouped = await getPersonPhotosGrouped(id);
+      setGroupedPhotos(grouped);
+    } catch (err) {
+      // Handle error (e.g., show a toast notification)
+      console.error("Failed to load gallery", err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [id, year]);
+  }, [id]);
 
   // 2. Run on mount and when year changes
   useEffect(() => {
     fetchPhotos();
   }, [fetchPhotos]);
 
+  const allPhotos = useMemo(
+    () => Object.values(groupedPhotos).flat(),
+    [groupedPhotos],
+  );
   // The delete function
   const handleDelete = async () => {
     if (selectedIds.length === 0) return;
@@ -85,34 +85,19 @@ export const InfoPage = () => {
       <div className="flex justify-center items-center flex-col gap-6">
         <PersonCard {...toPersonView(person)} />
         <div className="flex items-center gap-4">
-          <select
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            className="bg-white border rounded-full px-4 py-2 text-sm shadow-sm"
-          >
-            {[2024, 2025, 2026].map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-
           {!isEditMode && (
-            <UploadButton
-              personId={id!}
-              year={year}
-              onSuccess={fetchPhotos} // 3. Refetch instead of reload!
-            />
+            <UploadButton personId={id!} onSuccess={fetchPhotos} />
           )}
 
-          {photos.length > 0 && (
+          {allPhotos.length > 0 && (
             <div className="flex items-center gap-4">
               <button
                 onClick={() => {
                   setIsEditMode(!isEditMode);
                   setSelectedIds([]);
                 }}
-                className={`py-2  px-4 rounded-xl transition ${isEditMode ? "bg-red-400 text-white" : "bg-white text-gray-600 shadow-sm"}`}
+                className={`py-2  px-4 rounded-xl transition 
+                  ${isEditMode ? "bg-red-400 text-white" : "bg-white text-gray-600 shadow-sm"}`}
               >
                 {isEditMode ? "Hủy" : "Sửa ⚙️"}
               </button>
@@ -131,67 +116,96 @@ export const InfoPage = () => {
       </div>
 
       <div className="mt-8">
-        {photos.length > 0 ? (
-          <>
-            <MasonryPhotoAlbum
-              photos={photos}
-              columns={(w) => (w < 400 ? 2 : 3)}
-              spacing={10}
-              onClick={({ index: clickedIndex }) => {
-                if (isEditMode) {
-                  toggleSelect(photos[clickedIndex].key as string);
-                } else {
-                  setIndex(clickedIndex);
-                }
-              }}
-              render={{
-                // 1. Custom Image - The library handles the container/spacing!
-                image: (props, { photo, width, height }) => {
-                  const isSelected = selectedIds.includes(photo.key as string);
-                  return (
-                    <SmartImage
-                      {...props} // Spreads src, alt, style (with width/height) from the lib
-                      width={width}
-                      alt="hinh anh"
-                      height={height}
-                      containerStyle={{ width: "100%", height: "100%" }}
-                      className={`transition-all duration-300 rounded-xl ${
-                        isSelected ? "scale-90 opacity-60 brightness-75" : ""
-                      } ${props.className}`}
-                    />
-                  );
-                },
-                // 2. Custom Overlays - These sit on top of the image
-                extras: (_, { photo }) => {
-                  const isSelected = selectedIds.includes(photo.key as string);
-                  if (!isEditMode) return null;
+        {Object.keys(groupedPhotos).length > 0 ? (
+          Object.entries(groupedPhotos).map(([year, yearPhotos]) => (
+            <div key={year} className="space-y-4">
+              {/* Year Header */}
+              <div className="flex items-center gap-4">
+                <h2 className="text-xl font-bold ">{year}</h2>
+                <div className="h-[2px] flex-grow bg-gray-400 rounded-full" />
+                <span className="text-sm text-gray-400 font-medium">
+                  {yearPhotos.length} ảnh
+                </span>
+              </div>
 
-                  return (
-                    <div className="absolute inset-0 pointer-events-none z-10">
-                      {isSelected ? (
-                        <div className="absolute top-2 right-2 text-3xl">
-                          ✅
-                        </div>
-                      ) : (
-                        <div className="absolute inset-0 border-2 border-dashed border-red-400 rounded-xl" />
-                      )}
-                    </div>
-                  );
-                },
-              }}
-            />
-            <Lightbox
-              index={index}
-              open={index >= 0}
-              close={() => setIndex(-1)}
-              slides={photos}
-            />
-          </>
+              <MasonryPhotoAlbum
+                photos={yearPhotos}
+                columns={(w) => (w < 400 ? 2 : 3)}
+                spacing={10}
+                onClick={({ index: clickedIndex }) => {
+                  if (isEditMode) {
+                    toggleSelect(yearPhotos[clickedIndex].key as string);
+                  } else {
+                    const globalIndex = allPhotos.findIndex(
+                      (p) => p.key === yearPhotos[clickedIndex].key,
+                    );
+                    setIndex(globalIndex);
+                  }
+                }}
+                render={{
+                  image: (props, { photo, width, height }) => {
+                    const isSelected = selectedIds.includes(
+                      photo.key as string,
+                    );
+                    return (
+                      <SmartImage
+                        {...props}
+                        alt="photo"
+                        width={width}
+                        height={height}
+                        className={cn(
+                          "transition-all duration-300 rounded-xl",
+                          isSelected && "scale-90 opacity-60 brightness-75",
+                        )}
+                      />
+                    );
+                  },
+                  extras: (_, { photo }) => {
+                    if (!isEditMode) return null;
+                    const isSelected = selectedIds.includes(
+                      photo.key as string,
+                    );
+                    return (
+                      <div className="absolute inset-0 pointer-events-none z-10">
+                        {isSelected ? (
+                          <div className="absolute top-2 right-2 text-2xl">
+                            ✅
+                          </div>
+                        ) : (
+                          <div className="absolute inset-0 border-2 border-dashed border-red-400/50 rounded-xl" />
+                        )}
+                      </div>
+                    );
+                  },
+                }}
+              />
+            </div>
+          ))
         ) : (
-          <h4 className="text-center text-gray-500 font-bold text-lg bg-white/50 rounded-xl p-4">
-            Chưa có ảnh nào upload y
+          <h4 className="text-center text-gray-500 font-bold p-8 bg-white/50 rounded-2xl">
+            Chưa có ảnh nào được tải lên
           </h4>
         )}
+
+        <Lightbox
+          index={index}
+          open={index >= 0}
+          plugins={[Zoom, Thumbnails, Fullscreen]}
+          close={() => setIndex(-1)}
+          zoom={{
+            maxZoomPixelRatio: 3,
+            zoomInMultiplier: 2,
+            doubleTapDelay: 300,
+          }}
+          thumbnails={{
+            position: "bottom",
+            width: 120,
+            height: 80,
+            border: 1,
+            gap: 10,
+          }}
+          slides={allPhotos}
+        />
       </div>
     </div>
   );
